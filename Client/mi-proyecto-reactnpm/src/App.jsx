@@ -2,57 +2,120 @@ import { useState } from 'react';
 import { Scene } from './components/Scene';
 import './App.css';
 
-// 1. Aquí definimos nuestra historia
-const storyData = [
-  { id: 1, text: "our baby is amazing doing well for us, I really love it" },
-  { id: 2, text: "Suddenly, it appeared in the horizon promising moving with the speed and inmediate charges" },
-  { id: 3, text: "Nuestro héroe tecleó 'npm run dev' y el mundo cambió para siempre. Fin." }
-];
+/**
+ * NARRATIVE DATA STRUCTURE
+ * * Each node represents a "Scene" in the story.
+ * @property {string} text - The narrative text displayed to the user.
+ * @property {string} image - URL for the background visual.
+ * @property {Array} options - List of choices the user can make.
+ * @property {string} text - Button label.
+ * @property {string} nextId - The ID of the next scene.
+ * @property {string} [getItem] - (Optional) Adds an item to the inventory.
+ * @property {string} [requiredItem] - (Optional) Only shows this choice if the user has the item.
+ */
+const storyData = {
+  start: {
+    text: "System initialized. You find yourself in a dimly lit server room. A 'Debug Protocol' manual lies on the floor.",
+    image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc4b?q=80&w=1200",
+    options: [
+      { text: "Take the Manual", nextId: "hallway", getItem: "Manual" },
+      { text: "Exit the room", nextId: "hallway" }
+    ]
+  },
+  hallway: {
+    text: "The hallway branches into two paths. A terminal at the end requires an administrator override.",
+    image: "https://images.unsplash.com/photo-1510511459019-5dee995d3ff4?q=80&w=1200",
+    options: [
+      { text: "Use Manual to hack terminal", nextId: "success", requiredItem: "Manual" },
+      { text: "Try to guess the password", nextId: "fail" },
+      { text: "Go back to start", nextId: "start" }
+    ]
+  },
+  success: {
+    text: "Access Granted! You've successfully bypassed the security layers. The hackathon project is complete.",
+    image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1200",
+    options: [{ text: "Reboot System", nextId: "start" }]
+  },
+  fail: {
+    text: "Access Denied. Security bots have detected your presence. System Lockdown engaged.",
+    image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1200",
+    options: [{ text: "Retry from Start", nextId: "start" }]
+  }
+};
 
+/**
+ * MAIN APPLICATION COMPONENT
+ * Handles global state: Current Scene and Inventory Management.
+ */
 function App() {
-  // 2. Creamos el estado para saber en qué página estamos. Empezamos en la 0 (la primera)
-  const [currentPage, setCurrentPage] = useState(0);
+  // HOOKS: State Management
+  const [currentSceneId, setCurrentSceneId] = useState("start");
+  const [inventory, setInventory] = useState([]);
 
-  // 3. Funciones para avanzar y retroceder
-  const handleNext = () => {
-    // Solo avanzamos si NO estamos en la última página
-    if (currentPage < storyData.length - 1) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
+  // DERIVED STATE: Fetching the current scene object based on the ID
+  const currentScene = storyData[currentSceneId];
 
-  const handlePrev = () => {
-    // Solo retrocedemos si NO estamos en la primera página
-    if (currentPage > 0) {
-      setCurrentPage(currentPage - 1);
+  /**
+   * NAVIGATION HANDLER
+   * Processes player choices, updates inventory, and transitions state.
+   * @param {Object} option - The selected choice object.
+   */
+  const handleChoice = (option) => {
+    // Inventory Logic: Add item if provided and not already owned
+    if (option.getItem && !inventory.includes(option.getItem)) {
+      setInventory((prev) => [...prev, option.getItem]);
     }
+
+    // Reset Logic: Clear inventory if player restarts
+    if (option.nextId === "start") {
+      setInventory([]);
+    }
+
+    // Transition Logic: Set new scene ID
+    setCurrentSceneId(option.nextId);
   };
 
   return (
     <main className="story-board">
-      {/* Pasamos el texto de la página actual a nuestra Escena */}
-      <Scene text={storyData[currentPage].text} />
+      {/* 1. VISUAL & TEXT LAYER */}
+      <Scene 
+        text={currentScene.text} 
+        image={currentScene.image} 
+      />
 
-      {/* 4. Los controles de navegación */}
-      <div className="controls">
-        <button 
-          onClick={handlePrev} 
-          disabled={currentPage === 0} // Desactiva el botón si estamos al inicio
-        >
-          Anterior
-        </button>
-        
-        <span className="page-indicator">
-          Página {currentPage + 1} de {storyData.length}
-        </span>
-
-        <button 
-          onClick={handleNext} 
-          disabled={currentPage === storyData.length - 1} // Desactiva si es el final
-        >
-          Siguiente
-        </button>
+      {/* 2. HUD LAYER (Heads-Up Display) */}
+      <div className="hud-inventory" aria-label="Player Inventory">
+        <span className="hud-label">LOGS:</span>
+        {inventory.length === 0 ? (
+          <span className="hud-empty"> No items found</span>
+        ) : (
+          inventory.map((item) => (
+            <span key={item} className="inventory-tag">
+              {item}
+            </span>
+          ))
+        )}
       </div>
+
+      {/* 3. INTERACTION LAYER */}
+      <nav className="controls-container">
+        {currentScene.options.map((option, index) => {
+          // Conditional Rendering: Check if player meets requirements
+          const isLocked = option.requiredItem && !inventory.includes(option.requiredItem);
+          
+          if (isLocked) return null;
+
+          return (
+            <button
+              key={`${currentSceneId}-${index}`}
+              className="action-button"
+              onClick={() => handleChoice(option)}
+            >
+              {option.text}
+            </button>
+          );
+        })}
+      </nav>
     </main>
   );
 }

@@ -1,0 +1,169 @@
+/* Custom Variables for a Tech/Hackathon Theme */
+:root {
+  --neon-cyan: #00f2ff;
+  --neon-purple: #bc13fe;
+  --bg-black: #050505;
+  --glass-bg: rgba(15, 15, 15, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --text-main: #e0e0e0;
+  --transition-smooth: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-black);
+  color: var(--text-main);
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  overflow: hidden;
+}
+
+/* Layout Container */
+.story-board {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Scene Background Layer */
+.scene-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  transition: var(--transition-smooth);
+  z-index: -1;
+}
+
+/* Overlay to ensure text readability */
+.scene-container::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.2) 0%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+}
+
+/* Narrative Box (Glassmorphism) */
+.narrative-box {
+  margin: auto auto 20px auto;
+  padding: 2.5rem;
+  max-width: 900px;
+  width: 90%;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-left: 4px solid var(--neon-cyan);
+  border-radius: 4px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+}
+
+.narrative-box p {
+  font-size: 1.35rem;
+  line-height: 1.7;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Inventory / HUD */
+.hud-inventory {
+  position: fixed;
+  top: 30px;
+  right: 30px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 100;
+}
+
+.hud-label {
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  color: var(--neon-cyan);
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.inventory-tag {
+  background: rgba(0, 242, 255, 0.1);
+  border: 1px solid var(--neon-cyan);
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: var(--neon-cyan);
+  box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
+}
+
+/* Controls & Buttons */
+.controls-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding-bottom: 60px;
+  z-index: 20;
+}
+
+.action-button {
+  background: rgba(255, 255, 255, 0.03);
+  color: white;
+  border: 1px solid var(--glass-border);
+  padding: 14px 32px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.action-button:hover {
+  background: white;
+  color: black;
+  transform: translateY(-3px);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+}
+
+/* Typewriter Cursor */
+.cursor {
+  display: inline-block;
+  width: 8px;
+  height: 1.2rem;
+  background-color: var(--neon-cyan);
+  margin-left: 5px;
+  vertical-align: middle;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .controls-container {
+    flex-direction: column;
+    padding: 20px;
+    align-items: stretch;
+  }
+  .narrative-box {
+    padding: 1.5rem;
+  }
+}
